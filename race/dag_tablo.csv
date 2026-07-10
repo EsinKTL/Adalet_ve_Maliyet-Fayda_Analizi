@@ -1,0 +1,8 @@
+Değişken,Rol,Ebeveynleri,Açıklama
+A,Kök (hassas öznitelik),—,"Irk (white=0, diğer=1). Karşıolgusal analizin odağı."
+FAM_INC,Ara değişken,A,Aile geliri dilimi. A'dan etkileniyor (tarihsel eşitsizlik).
+LSAT,Ara değişken,"A, FAM_INC",Sınav puanı. A doğrudan + FAM_INC üzerinden dolaylı etkileniyor.
+UGPA,Ara değişken,"A, FAM_INC",Lisans not ortalaması. LSAT ile aynı mantık.
+TIER,Ara değişken,"LSAT, UGPA, FAM_INC",Okul prestij kademesi. Giriş puanları ve gelirle belirleniyor.
+DECILE1,Ara değişken,"LSAT, UGPA, TIER",1. yıl hukuk fakültesi performansı.
+Y,Hedef değişken,"DECILE1, FAM_INC",Bar sınavını geçme durumu (pass_bar).
