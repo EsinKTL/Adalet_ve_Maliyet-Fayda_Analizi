@@ -1,6 +1,6 @@
-# ⚖️ Adalet ve Maliyet-Fayda Analizi (Counterfactual Fairness)
+# ⚖️ Yapısal Nedensel Model (SCM) ile Algoritmik Adalet ve Karşıolgusal Analiz
 
-> **Hukuk fakültesi öğrencilerinin başarılarını, ırk gibi hassas özniteliklerin tarihsel ve dolaylı etkilerinden arındırarak adil bir şekilde değerlendirmeyi amaçlayan Yapısal Nedensel Model (SCM) çalışması.**
+> **Proje Özeti:** Makine öğrenmesi tahmin modellerinde, cinsiyet gibi hassas niteliklerin yarattığı dolaylı ayrımcılığı (bias), Yapısal Nedensel Modeller (SCM) ve karşıolgusal (counterfactual) simülasyonlar kullanarak tespit eden ve gideren bir algoritmik adalet (causal fairness) analiz projesidir.
 
 ---
 
