@@ -2,7 +2,9 @@ import os
 import pandas as pd
 import numpy as np
 import statsmodels.api as sm
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, confusion_matrix
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 orig_u_path = os.path.join(current_dir, "lsac_with_U_zengin.csv")
@@ -49,51 +51,71 @@ print("\n=== ZENGİNLEŞTİRİLMİŞ DAG: NİHAİ ADALET RAPORU ===")
 print(f"Adil Olmayan Model Doğruluğu  : % {acc_unfair*100:.2f} | Flip Oranı: % {flip_unfair:.2f}")
 print(f"Nedensel (Adil) Model Doğruluğu: % {acc_fair*100:.2f} | Flip Oranı: % {flip_fair:.2f}")
 
-import matplotlib.pyplot as plt
-import seaborn as sns
+# --- 3. CONFUSION MATRIX HESAPLAMALARI ---
+# Matris değerlerini doğrudan modelin kendi çıktısından otomatik alıyoruz
+cm_base = confusion_matrix(y, preds_unfair)
+cm_fair = confusion_matrix(y, preds_fair)
 
-# --- ADIM 4: SONUÇLARIN PROFESYONEL OLARAK GÖRSELLEŞTİRİLMESİ ---
+print("Adil Olmayan Matris:\n", cm_base)
+print("Adil Model Matrisi:\n", cm_fair)
 
-# Grafiğin stilini daha profesyonel (akademik) bir temaya ayarlıyoruz
-sns.set_theme(style="whitegrid")
 
-# Çizilecek verileri hazırlıyoruz
-modeller = ['Adil Olmayan (Klasik) Model', 'Nedensel (Adil) Model']
-dogruluk_oranlari = [acc_unfair * 100, acc_fair * 100]
-flip_oranlari = [flip_unfair, flip_fair]
+# --- 4. GÖRSELLEŞTİRME 1: CONFUSION MATRIX ISI HARİTALARI ---
+fig, axes = plt.subplots(1, 2, figsize=(14, 6))
 
-x = np.arange(len(modeller))  # X eksenindeki etiketlerin konumu
-genislik = 0.35  # Sütun genişliği
+# Adil Olmayan Model Isı Haritası
+sns.heatmap(cm_base, annot=True, fmt='d', cmap='Reds', ax=axes[0], cbar=False, annot_kws={"size": 14})
+axes[0].set_title(f'Adil Olmayan Model (Baseline)\nAccuracy: %{acc_unfair*100:.2f}', fontsize=14, fontweight='bold')
+axes[0].set_xlabel('Tahmin Edilen (Predicted)', fontsize=12)
+axes[0].set_ylabel('Gerçek (Actual)', fontsize=12)
+axes[0].set_xticklabels(['Kalan (0)', 'Geçen (1)'])
+axes[0].set_yticklabels(['Kalan (0)', 'Geçen (1)'])
 
-# Şekil ve eksenleri oluşturuyoruz
-fig, ax = plt.subplots(figsize=(10, 6))
+# Adil Model Isı Haritası
+sns.heatmap(cm_fair, annot=True, fmt='d', cmap='Blues', ax=axes[1], cbar=False, annot_kws={"size": 14})
+axes[1].set_title(f'Karşıolgusal Adil Model (Fair)\nAccuracy: %{acc_fair*100:.2f}', fontsize=14, fontweight='bold')
+axes[1].set_xlabel('Tahmin Edilen (Predicted)', fontsize=12)
+axes[1].set_ylabel('Gerçek (Actual)', fontsize=12)
+axes[1].set_xticklabels(['Kalan (0)', 'Geçen (1)'])
+axes[1].set_yticklabels(['Kalan (0)', 'Geçen (1)'])
 
-# Doğruluk Sütunları (Yeşil tonları)
-sutun1 = ax.bar(x - genislik/2, dogruluk_oranlari, genislik, label='Doğruluk / Accuracy (%)', color='#2ca02c', edgecolor='black')
+plt.tight_layout()
+plt.show()
 
-# Flip Oranı Sütunları (Kırmızı tonları - Tehlike/Adaletsizlik vurgusu)
-sutun2 = ax.bar(x + genislik/2, flip_oranlari, genislik, label='Flip Oranı / Adaletsizlik (%)', color='#d62728', edgecolor='black')
 
-# Grafiğe başlık ve etiketler ekliyoruz
+# --- 5. GÖRSELLEŞTİRME 2: ADALET VERGİSİ (TRADE-OFF) BAR GRAFİĞİ ---
+labels = ['Adil Olmayan (Baseline)', 'Adil (Fair Model)']
+
+# Rakamları terminalden çekip otomatik yuvarlıyoruz
+accuracy_scores = [round(acc_unfair * 100, 2), round(acc_fair * 100, 2)]
+cc_scores = [round(100 - flip_unfair, 2), round(100 - flip_fair, 2)]
+
+x = np.arange(len(labels))
+width = 0.35
+
+fig2, ax = plt.subplots(figsize=(10, 6))
+
+rects1 = ax.bar(x - width/2, accuracy_scores, width, label='Doğruluk (Accuracy) %', color='#2c3e50')
+rects2 = ax.bar(x + width/2, cc_scores, width, label='Karşıolgusal Tutarlılık (CC) %', color='#e74c3c')
+
 ax.set_ylabel('Yüzde (%)', fontsize=12, fontweight='bold')
-ax.set_title('Model Performansı ve Karşıolgusal Adalet Karşılaştırması', fontsize=14, fontweight='bold', pad=20)
+ax.set_title('Modeller Arası Performans ve Adalet Ödünleşimi (Trade-off)', fontsize=16, fontweight='bold')
 ax.set_xticks(x)
-ax.set_xticklabels(modeller, fontsize=12)
-ax.legend(fontsize=11)
+ax.set_xticklabels(labels, fontsize=12)
+ax.legend(fontsize=12, loc='lower right')
 
-# Sütunların tam üzerine değerleri sayısal olarak yazdırıyoruz
-ax.bar_label(sutun1, padding=3, fmt='%.2f', fontsize=11, fontweight='bold')
-ax.bar_label(sutun2, padding=3, fmt='%.2f', fontsize=11, fontweight='bold')
+def autolabel(rects):
+    for rect in rects:
+        height = rect.get_height()
+        ax.annotate(f'{height}%',
+                    xy=(rect.get_x() + rect.get_width() / 2, height),
+                    xytext=(0, 3),
+                    textcoords="offset points",
+                    ha='center', va='bottom', fontsize=11, fontweight='bold')
 
-# Y eksenini 0 ile 105 arasına sıkıştırıyoruz ki yazılar grafiğin üstünden taşmasın
-ax.set_ylim(0, 110)
+autolabel(rects1)
+autolabel(rects2)
 
-# Çıktıyı klasöre yüksek çözünürlüklü olarak kaydediyoruz
-grafik_yolu = os.path.join(current_dir, "Model_Karsilastirma_Grafikleri.png")
-fig.tight_layout()
-plt.savefig(grafik_yolu, format="PNG", dpi=300)
-
-print(f"\nProfesyonel performans grafiği '{grafik_yolu}' adıyla klasöre kaydedildi!")
-
-# Grafiği ekranda göster
+ax.set_ylim(0, 115)
+plt.tight_layout()
 plt.show()
