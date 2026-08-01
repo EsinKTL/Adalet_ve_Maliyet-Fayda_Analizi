@@ -24,7 +24,7 @@ Proje tamamen **Python** ekosistemi üzerinde geliştirilmiş olup, nedensellik 
 - **Statsmodels:** İstatistiksel regresyonlar, katsayı analizi ve kalıntı (residual) hesaplamaları için.
 - **Pandas & NumPy:** Veri işleme, manipülasyon ve matris işlemleri için.
 - **NetworkX:** Nedensel ilişkilerin (DAG) matematiksel olarak kurulması için.
-- **Matplotlib:** DAG tablolarının görselleştirilmesi için.
+- **Matplotlib & Seaborn:** DAG tablolarının ve veri seti istatistiklerinin görselleştirilmesi için.
 
 ---
 
@@ -37,15 +37,32 @@ Projeyi yerel makinenizde çalıştırmak için ilgili Python ortamınızda aşa
 pip install pandas numpy statsmodels scikit-learn networkx matplotlib seaborn
 ```
 
-> **Not:** Projeyi bilgisayarınıza indirdikten sonra, çalışmak için gereken temizlenmiş ham verinin (`lsac_clean.csv`) çalışma dizininde bulunduğundan emin olun.
+> **Önemli Not:** Projeyi çalıştırabilmeniz için temizlenmiş ham veriye (`lsac_clean.csv`) ihtiyacınız vardır. Bu dosyayı elde etmek için öncelikle projenin **ana dizininde** bulunan veri ön işleme betiğini çalıştırmalısınız:
+> ```bash
+> # Ana dizindeki (root) terminalde çalıştırın
+> python preprocessing.py
+> ```
+> Oluşan `lsac_clean.csv` dosyasının, çalışacağınız (bu klasör) dizininde bulunduğundan emin olun.
 
 ---
 
 ## 🚀 Kullanım ve Dosyaların Anlamsal Çıkarımları
 
-Proje içerisindeki üç ana Python script'i mantıksal bir sıralama ile çalıştırılmalıdır. Sistemdeki her bir dosyanın projedeki rolü ve ürettiği sonuçlar şöyledir:
+Proje içerisindeki Python script'leri mantıksal bir sıralama ile çalıştırılmalıdır. Sistemdeki her bir dosyanın projedeki rolü ve ürettiği sonuçlar şöyledir:
 
-### 1. Nedensel Haritanın Çıkarılması (`DAG.py`)
+### 1. Veri Seti Genel Analizi (`dataset_genel_analiz.py`)
+Model eğitimine ve nedensel simülasyonlara başlamadan önce `lsac_clean.csv` veri setinin genel istatistiksel durumunu analiz eder.
+
+**Çalıştırma Komutu:**
+```bash
+python dataset_genel_analiz.py
+```
+* **Mantıksal Çıkarım:** Öğrencilerin LSAT puanları, lisans ortalamaları, aile gelir dağılımları ve cinsiyet oranları gibi temel istatistiklerini terminal üzerinden raporlar. Aynı zamanda verilerin genel dağılım grafiğini çizerek projenin dayanacağı verinin fotoğrafını çeker.
+* **Çıktı:** Konsolda genel özet raporu ve dizin içerisinde `Genel_Veri_Seti_Dagilimi.png` görselini üretir.
+
+---
+
+### 2. Nedensel Haritanın Çıkarılması (`DAG.py`)
 Değişkenler arası nedensel bağların şematik haritasını (Yönlü Döngüsüz Graf - DAG) oluşturur.
 
 **Çalıştırma Komutu:**
@@ -53,11 +70,13 @@ Değişkenler arası nedensel bağların şematik haritasını (Yönlü Döngüs
 python DAG.py
 ```
 * **Mantıksal Çıkarım:** Veri setindeki Cinsiyet, Aile Geliri, Notlar ve Baro Başarısı arasındaki etki-tepki zincirini matematiksel bir yapıya (graf) döker. Sistemin hangi yönde aktığını görselleştirerek modelin teorik altyapısını temellendirir.
-* **Çıktı:** `Gelişmiş_DAG_Haritası.png` görselini üretir.
+* **Çıktı:** Klasörde `csv/Cinsiyet_Dag_Tablosu.csv` dosyasını (matematiksel bağlantılar tablosu) ve görsel olarak `assets/Gelişmiş_DAG_Haritası.png` dosyasını üretir.
+
+![Nedensel Harita (DAG)](assets/Gelişmiş_DAG_Haritası.png)
 
 ---
 
-### 2. Modellerin Eğitilmesi ve Simülasyon (`TrainModel.py`)
+### 3. Modellerin Eğitilmesi ve Simülasyon (`TrainModel.py`)
 Kalıntı değişkenleri hesaplar ve paralel evren (karşıolgusal) verilerini türetir.
 
 **Çalıştırma Komutu:**
@@ -65,11 +84,11 @@ Kalıntı değişkenleri hesaplar ve paralel evren (karşıolgusal) verilerini t
 python TrainModel.py
 ```
 * **Mantıksal Çıkarım:** Sistem öncelikle, kişinin başarılarına etki eden cinsiyet ve gelir gibi dış etkenleri izole edip, kişinin sadece "kendi çabasını/genel faktörleri" temsil eden saf kalıntı değerlerini ($U$ matrisleri) bulur. Ardından *"Bu kişilerin cinsiyeti farklı olsaydı, notları ve fakülte başarıları nasıl değişirdi?"* sorusunun simülasyonunu yapar.
-* **Çıktı:** Adil bir öğrenme için arındırılmış `lsac_with_U_zengin.csv` ve karşıolgusal `lsac_counterfactual_sim_zengin.csv` veri setlerini oluşturarak sisteme kaydeder.
+* **Çıktı:** Adil bir öğrenme için arındırılmış `csv/lsac_with_U_zengin.csv` ve karşıolgusal `csv/lsac_counterfactual_sim_zengin.csv` veri setlerini oluşturarak sisteme kaydeder.
 
 ---
 
-### 3. Modellerin Karşılaştırılması ve Nihai Raporlama (`nihai_degerlendirme.py`)
+### 4. Modellerin Karşılaştırılması ve Nihai Raporlama (`nihai_degerlendirme.py`)
 Modelleri rekabet ettirir ve adaletsizlik (bias) ölçümü yapar.
 
 **Çalıştırma Komutu:**
@@ -77,4 +96,6 @@ Modelleri rekabet ettirir ve adaletsizlik (bias) ölçümü yapar.
 python nihai_degerlendirme.py
 ```
 * **Mantıksal Çıkarım:** Arındırılmış faktörlerle eğitilen "Nedensel Adil Model" ile ayrımcı olabilecek dış etkenleri içeren "Klasik Model", cinsiyetin tersine çevrildiği veriler üzerinde teste tabi tutulur. Model doğruluğunun (Accuracy) yanı sıra, cinsiyet değiştiğinde verilen baro kararının ne kadar değiştiğini gösteren Adaletsizlik (Flip) oranı ölçülür.
-* **Çıktı:** Sonuçlar `Model_Karsilastirma_Grafikleri.png` ile görselleştirilir ve klasik modellerin kırılganlığına karşın, adil modellerin yapısal istikrarı bilimsel bir profesyonellikte kanıtlanmış olur.
+* **Çıktı:** Sonuçlar `assets/Model_Karsilastirma_Grafikleri.png` ile görselleştirilir ve klasik modellerin kırılganlığına karşın, adil modellerin yapısal istikrarı bilimsel bir profesyonellikte kanıtlanmış olur.
+
+![Model Karşılaştırma ve Flip Oranı](assets/Model_Karsilastirma_Grafikleri.png)
