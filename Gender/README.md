@@ -1,10 +1,10 @@
-# ⚖️ Yapısal Nedensel Model (SCM) ile Algoritmik Adalet ve Karşıolgusal Analiz
+# Yapısal Nedensel Model (SCM) ile Algoritmik Adalet ve Karşıolgusal Analiz
 
 > **Proje Özeti:** Makine öğrenmesi tahmin modellerinde, cinsiyet gibi hassas niteliklerin yarattığı dolaylı ayrımcılığı (bias), Yapısal Nedensel Modeller (SCM) ve karşıolgusal (counterfactual) simülasyonlar kullanarak tespit eden ve gideren bir algoritmik adalet (causal fairness) analiz projesidir.
 
 ---
 
-## 📖 Detaylı Açıklama
+## Detaylı Açıklama
 
 Günümüzde algoritmik karar alma sistemleri, veri setlerindeki tarihsel önyargıları öğrenerek ayrımcı sonuçlar üretebilmektedir. Bu proje, hukuk fakültesi öğrenci verilerini temel alarak **Baro Başarısını** tahmin ederken, **Cinsiyet** değişkeninin diğer değişkenler (Aile Geliri, UGPA, LSAT, Fakülte Kalitesi vb.) üzerindeki dolaylı ve haksız etkilerini ortadan kaldırmayı amaçlar. 
 
@@ -16,7 +16,7 @@ Proje, **Nedensel Çıkarım (Causal Inference)** ilkelerine dayanarak şu süre
 
 ---
 
-## 🛠 Kullanılan Teknolojiler
+## Kullanılan Teknolojiler
 
 Proje tamamen **Python** ekosistemi üzerinde geliştirilmiş olup, nedensellik ve veri analizi için endüstri standardı kütüphaneler kullanmaktadır:
 
@@ -28,7 +28,7 @@ Proje tamamen **Python** ekosistemi üzerinde geliştirilmiş olup, nedensellik 
 
 ---
 
-## ⚙️ Gereksinimler & Kurulum
+## Gereksinimler & Kurulum
 
 Projeyi yerel makinenizde çalıştırmak için ilgili Python ortamınızda aşağıdaki kütüphanelerin yüklü olması gerekmektedir. Bağımlılıkları terminalinizde tek bir komutla kurabilirsiniz:
 
@@ -46,7 +46,7 @@ pip install pandas numpy statsmodels scikit-learn networkx matplotlib seaborn
 
 ---
 
-## 🚀 Kullanım ve Dosyaların Anlamsal Çıkarımları
+## Kullanım ve Dosyaların Anlamsal Çıkarımları
 
 Proje içerisindeki Python script'leri mantıksal bir sıralama ile çalıştırılmalıdır. Sistemdeki her bir dosyanın projedeki rolü ve ürettiği sonuçlar şöyledir:
 
