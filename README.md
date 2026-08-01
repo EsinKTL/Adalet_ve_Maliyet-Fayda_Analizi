@@ -64,11 +64,11 @@ Projede kullanılan LSAC veri seti, hukuk öğrencilerinin akademik ve demografi
 
 **1. Irk (Race) Ekseni Nedensellik Haritası (DAG)**
 *(Aşağıdaki görsel, ırkın aile geliri üzerinden akademik başarıyı dolaylı yoldan nasıl etkilediğini göstermektedir.)*
-![Irk Nedensellik Haritası](race/dag_gorsel_v2.png)
+<img src="./race/assets/dag_gorsel_v2.png" alt="Irk Nedensellik Haritası" width="800"/>
 
 **2. Cinsiyet (Gender) Ekseni Nihai Adalet Performansı**
 *(Aşağıdaki grafik, Klasik Model ile Adil Model arasındaki doğruluk (Accuracy) ve kırılganlık (Flip Rate) rekabetini göstermektedir. Adil model, %0'a yakın Flip oranı ile mutlak istikrar sağlamıştır.)*
-![Cinsiyet Model Karşılaştırması](Gender/Model_Karsilastirma_Grafikleri.png)
+<img src="./Gender/assets/Model_Karsilastirma_Grafikleri.png" alt="Cinsiyet Model Karşılaştırması" width="800"/>
 
 ---
 
@@ -82,49 +82,60 @@ Proje_Ana_Dizini
 ┣ bar_pass_prediction.csv                   # Ham Veri Seti (Dışarıdan eklenir)
 ┣ preprocessing.py                          # Veri temizleme scripti
 ┣ lsac_clean.csv                            # Ön işleme çıktısı (Temizlenmiş veri)
+┣ Genel_Veri_Seti_Dagilimi.png              # Tüm verinin görsel analizi
 ┣ race                                      # Irk (Race) Ekseni Analizleri
-┃ ┣ dag.py
-┃ ┣ scm_race.py
-┃ ┣ dag_tablo.csv                           # Çıktı: DAG Tablosu
-┃ ┗ dag_gorsel_v2.png                       # Çıktı: Irk Nedensellik Haritası
+┃ ┣ accuracy.py                             # Modellerin doğruluk kıyaslaması
+┃ ┣ dag.py                                  # DAG modelinin oluşturulması
+┃ ┣ markov_blanket.py                       # Adil olmayan veri için öznitelik seçimi
+┃ ┣ markov_blanket_adil.py                  # Adil veri için öznitelik seçimi
+┃ ┣ scm_race.py                             # OLS regresyonları ve SCM simülasyonu
+┃ ┣ visualization_race.py                   # Analizlerin görselleştirilmesi
+┃ ┣ csv
+┃ ┃ ┗ dag_tablo.csv                         # Çıktı: DAG Tablosu
+┃ ┗ assets
+┃   ┣ dag_gorsel_v2.png                     # Çıktı: Irk Nedensellik Haritası
+┃   ┣ img.png                               # Çıktı: Isı haritaları
+┃   ┗ img_1.png                             # Çıktı: Trade-off bar grafiği
 ┗ Gender                                    # Cinsiyet (Gender) Ekseni Analizleri
-  ┣ DAG.py
-  ┣ TrainModel.py
-  ┣ nihai_degerlendirme.py
-  ┣ lsac_with_U_zengin.csv                  # Çıktı: Kalıntı (U) hesaplanmış veri
-  ┣ lsac_counterfactual_sim_zengin.csv      # Çıktı: Karşıolgusal simülasyon verisi
-  ┣ Gelişmiş_DAG_Haritası.png               # Çıktı: Cinsiyet Nedensellik Haritası
-  ┗ Model_Karsilastirma_Grafikleri.png      # Çıktı: Final Performans ve Flip Raporu
+  ┣ DAG.py                                  # Cinsiyet nedensellik ağının kurulması
+  ┣ dataset_genel_analiz.py                 # Cinsiyet özelinde genel veri istatistikleri
+  ┣ nihai_degerlendirme.py                  # Klasik ve adil modellerin kıyaslanması
+  ┣ TrainModel.py                           # Adil (U) özelliklerin çıkarılması
+  ┣ csv
+  ┃ ┣ Cinsiyet_Dag_Tablosu.csv              # Çıktı: Cinsiyet DAG tablosu
+  ┃ ┣ lsac_counterfactual_sim_zengin.csv    # Çıktı: Karşıolgusal simülasyon verisi
+  ┃ ┗ lsac_with_U_zengin.csv                # Çıktı: Kalıntı (U) hesaplanmış veri
+  ┗ assets
+    ┣ Gelişmiş_DAG_Haritası.png             # Çıktı: Cinsiyet Nedensellik Haritası
+    ┗ Model_Karsilastirma_Grafikleri.png    # Çıktı: Final Performans ve Flip Raporu
 ```
 
 ---
 
-# Dosyaların Anlamsal Analizleri ve Çıktıların Yorumlanması
+## Dosyaların Anlamsal Analizleri ve Görevleri (Detaylı Kılavuz)
 
-## Ana Dizin (Veri Hazırlığı)
-* **`preprocessing.py`**: Ham veri setini (`bar_pass_prediction.csv`) işler. Model karmaşıklığına neden olabilecek kopya değişkenleri (age, dropout vb.) temizler, eksik verileri sterilize eder ve hassas özellikleri (Race: 0/1, Gender: 0/1) ikili formata çevirerek matematiksel modellere hazır olan `lsac_clean.csv` dosyasını üretir.
+Sistem mimarisi adım adım çalışacak Python betiklerinden (script) oluşur. Tüm dosyaların sistemsel rolü detaylı olarak aşağıda açıklanmıştır:
 
----
+### 1. Ana Dizin (Veri Hazırlığı)
+* **`preprocessing.py`**: Sistemin ilk ve en önemli adımıdır. Dışarıdan alınan `bar_pass_prediction.csv` dosyasını işler. Modeli kirletecek `age`, `dropout` gibi kopya değişkenleri çıkarır, eksik verileri siler (dropna) ve kategorik öznitelikleri (Race, Gender vb.) ikili (binary 0-1) sistemlere dönüştürerek makine öğrenmesine tam uyumlu olan `lsac_clean.csv` dosyasını dışarı aktarır.
 
-## Race (Irk) Ekseni (`race` Klasörü)
-* **`dag.py`**: Irk ($A$) özelliğinin başarıyı nasıl dolaylı yollardan etkilediğini gösteren Yönlü Döngüsüz Graf (DAG) haritasını (`dag_gorsel_v2.png`) ve `dag_tablo.csv` çıktısını üretir. Irkın sadece doğrudan değil, aile geliri üzerinden akademik başarıyı nasıl dolaylı etkilediğini haritalandırır.
-* **`scm_race.py`**: Ana analiz dosyalarından biridir. İstatistiksel regresyonlar üzerinden (Statsmodels) ırk katsayısını çıkarır ve gözlemlenemeyen ($U$) yetenek matrisini oluşturur.
+### 2. Race (Irk) Ekseni (`race` Klasörü)
+* **`dag.py`**: Irkın (`A`), aile geliri üzerinden akademik başarılara (LSAT, UGPA) nasıl aktığını NetworkX ile hiyerarşik bir ağ (DAG) olarak modeller ve `dag_gorsel_v2.png` çıktısını üretir.
+* **`scm_race.py`**: Klasörün ana analiz motorudur. Statsmodels kullanarak her bir değişken için OLS (Regresyon) modelleri çalıştırır. Bireyin ırkı nedeniyle karşılaştığı dezavantajları denklemden düşerek "U" (Saf çaba/kalıntı) faktörünü hesaplar (Abduction). Daha sonra öğrencinin ırkı tersine çevrilseydi sonucun ne olacağının paralel evren verisini (`_cf`) oluşturur.
+* **`accuracy.py`**: Scikit-Learn ile iki farklı Lojistik Regresyon modeli eğitir. İlki ham (ırk barındıran) veriyle, ikincisi saf ($U$) değerlerle eğitilir. Modellerin Accuracy (Doğruluk) ve Counterfactual Consistency (Adaletsizlik - Kararın ne kadar değiştiği) ölçümlerini yaparak raporlar.
+* **`visualization_race.py`**: `accuracy.py`'dan elde edilen metrikleri seaborn kütüphanesiyle Karışıklık Matrisi (Confusion Matrix) ısı haritalarına ve Model Doğruluğu vs. Adalet (Cost of Fairness) çubuk grafiklerine (`img.png`, `img_1.png`) dönüştürür.
+* **`markov_blanket.py` & `markov_blanket_adil.py`**: Mutual Information (Karşılıklı Bilgi) algoritması kullanarak özellik seçimi (Feature Selection) yapar. Hangi özelliğin (örn: Aile Geliri) model için ne kadar bilgi taşıdığını hesaplar ve bu veriyi toplama maliyetine göre (cost-sensitive) değişken budama senaryoları sunar. İlki ham veri, ikincisi "adil U faktörleri" üzerinden çalışır.
 
-### Çıktıların Yorumlanması:
-* **Katsayılar**: Ekrana basılan `FAM_INC` (Aile Geliri) OLS modelinde Irk ($A$) değişkeninin katsayısı negatif çıkmaktadır. Bu, dezavantajlı grupta olmanın tarihsel eşitsizlikler nedeniyle geliri düşürdüğünü matematiksel olarak ispatlar.
-* **Korelasyon Değerleri**: Hesaplanan $U$ (Residual) değerleri ile model girdileri ($A$) arasındaki korelasyon matematiksel bir zorunluluk olarak sıfıra yakındır ($0.00X$). Bu, modelin ırkın yapısal etkisini başarılı bir şekilde izole ettiğini (Abduction) kanıtlar.
-* **Karşıolgusal Veriler**: Sistem, dezavantajlı bir öğrenci ($A=1$) avantajlı grupta ($A=0$) olsaydı; gelirinin ve başarı puanlarının ne olacağını simüle eder. Elde edilen arındırılmış `_cf` verileri "Adil" hedefleri yansıtır.
-
----
-
-## Gender (Cinsiyet) Ekseni (`Gender` Klasörü)
-* **`DAG.py`**: Cinsiyet eşitsizliğinin nedensel etki zincirini `Gelişmiş_DAG_Haritası.png` ile görselleştirir.
-* **`TrainModel.py`**: Cinsiyet etkisinden arındırılmış `lsac_with_U_zengin.csv` veri setini ve paralel evren zincirleme simülasyonu olan karşıolgusal `lsac_counterfactual_sim_zengin.csv` veri tabanını kaydeder.
-* **`nihai_degerlendirme.py`**: Sistemdeki nihai hakemdir. Gerçek yaşam verisiyle eğitilen kara-kutu (Black-box) model ile, saf yetenek ($U$) üzerine kurulan Adil Modeli karşılaştırır. Klasik model cinsiyet değişiminde yüksek oranda Flip (kırılganlık) yaşarken, Adil Modelin yapısal istikrarı `Model_Karsilastirma_Grafikleri.png` raporuyla kanıtlanır.
+### 3. Gender (Cinsiyet) Ekseni (`Gender` Klasörü)
+* **`dataset_genel_analiz.py`**: Model eğitimlerine geçmeden önce veri setinin istatistiksel röntgenini çeker. Ortalamaları hesaplar ve genel dağılımları (LSAT, Gelir, Cinsiyet dağılımı vs.) `Genel_Veri_Seti_Dagilimi.png` adıyla grafiksel olarak dışarı aktarır.
+* **`DAG.py`**: Cinsiyet eşitsizliğinin nedensel etki zincirini ve istatistiksel ağırlıklarını ağ formatında kurarak `Gelişmiş_DAG_Haritası.png` ile görselleştirir.
+* **`TrainModel.py`**: Cinsiyet etkisinden arındırılmış `lsac_with_U_zengin.csv` veri setini ve "Kişi farklı cinsiyette olsaydı performansı ne olurdu?" sorusunun cevabı olan `lsac_counterfactual_sim_zengin.csv` veri tabanını işleyerek kaydeder.
+* **`nihai_degerlendirme.py`**: Sistemdeki nihai hakemdir. Geleneksel kara-kutu (Black-box) model ile, saf yetenek ($U$) üzerine kurulan Adil Modeli karşılaştırır. Klasik model cinsiyet değişiminde yüksek oranda Flip (kırılganlık) yaşarken, Adil Modelin yapısal istikrarı `Model_Karsilastirma_Grafikleri.png` raporuyla kanıtlanır.
 
 ---
 
 ## Gerçek Dünya Vizyonu (Kurumsal Etki)
+
 Burada kurulan yapısal nedensel mimari, yalnızca akademik bir test ortamı değil, ölçeklenebilir bir kurumsal çözümdür:
 * **Bankacılık / Finans**: Kredi skorlamalarında posta kodu veya eğitim geçmişine gizlenmiş (proxy) algoritmik ayrımcılığı engelleyerek güvenli ve yasalara tam uyumlu risk modelleri sunar.
 * **İnsan Kaynakları**: Özgeçmiş değerlendiren AI sistemlerinde adayların salt liyakat puanlarını ($U$ faktörü) izole ederek objektif işe alımı garanti eder.
@@ -133,16 +144,18 @@ Burada kurulan yapısal nedensel mimari, yalnızca akademik bir test ortamı de�
 ---
 
 ## Kullanılan Teknolojiler
+
 Proje tamamen Python ekosistemi üzerinde geliştirilmiş olup, endüstri standardı kütüphaneler kullanmaktadır:
 * **Python 3.x**
 * **Statsmodels**: İstatistiksel regresyonlar, katsayı analizi ve kalıntı hesaplamaları.
 * **Pandas & NumPy**: Veri işleme, manipülasyon ve lineer cebir işlemleri.
-* **Scikit-learn**: Makine öğrenmesi ve model metrik değerlendirmeleri.
+* **Scikit-learn**: Makine öğrenmesi sınıflandırma ve özellik seçimi (Feature Selection).
 * **NetworkX & Matplotlib & Seaborn**: Nedensel ilişkilerin kurulması ve gelişmiş veri görselleştirmesi.
 
 ---
 
 ## Gereksinimler & Kurulum
+
 Projeyi klonladıktan sonra, bağımlılıkları tek bir komutla ortamınıza kurabilirsiniz:
 
 ```bash
@@ -159,32 +172,40 @@ pip install pandas numpy statsmodels scikit-learn networkx matplotlib seaborn
 ---
 
 ## Çalıştırma Adımları
+
 Projeyi ve tüm nedensel zincir simülasyonlarını yerel makinenizde sırasıyla çalıştırmak için aşağıdaki komutları terminalinizde uygulayın:
 
-1. **Temel Ön İşleme (Ana Dizinde)**
+**1. Temel Ön İşleme (Ana Dizinde)**
 ```bash
 python preprocessing.py
 ```
 
-2. **Irk (Race) Analizleri Çalıştırması**
+**2. Irk (Race) Analizleri Çalıştırması**
 ```bash
 cd race
 python dag.py
 python scm_race.py
+python accuracy.py
+python visualization_race.py
+python markov_blanket.py
+python markov_blanket_adil.py
 cd ..
 ```
 
-3. **Cinsiyet (Gender) ve Nihai Raporlama Çalıştırması**
+**3. Cinsiyet (Gender) ve Nihai Raporlama Çalıştırması**
 ```bash
 cd Gender
+python dataset_genel_analiz.py
 python DAG.py
 python TrainModel.py
 python nihai_degerlendirme.py
+cd ..
 ```
 
 ---
 
-##  Katkıda Bulunanlar (Contributors)
+## Katkıda Bulunanlar (Contributors)
+
 Bu proje aşağıda yer alan araştırmacıların vizyonu ve teknik katkıları ile hayata geçirilmiştir. İş birlikleri veya sorularınız için geliştirici ekibine ulaşabilirsiniz:
 
 * **Mehmet Özdemir** - [LinkedIn](https://www.linkedin.com/in/mehmetozdemirmo/) | [GitHub](https://github.com/mehmetozdemirmo)
