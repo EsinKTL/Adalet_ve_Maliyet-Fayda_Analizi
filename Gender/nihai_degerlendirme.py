@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
-orig_u_path = os.path.join(current_dir, "lsac_with_U_zengin.csv")
-cf_path = os.path.join(current_dir, "lsac_counterfactual_sim_zengin.csv")
+orig_u_path = os.path.join(current_dir, "csv", "lsac_with_U_zengin.csv")
+cf_path = os.path.join(current_dir, "csv", "lsac_counterfactual_sim_zengin.csv")
 
 df_orig = pd.read_csv(orig_u_path)
 df_cf = pd.read_csv(cf_path)
